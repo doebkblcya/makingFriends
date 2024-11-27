@@ -1,21 +1,17 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import axios from 'axios';
+import { createApp } from 'vue';
+import App from './App.vue';
 import router from './router';
+import axios from 'axios';
 
-createApp(App).mount('#app')
+// 配置 axios 全局默认设置
+axios.defaults.baseURL = 'http://localhost:8000/api/';
 
-axios.defaults.baseURL = 'http://localhost:8000/api/'; // 后端API地址
-
-// 在需要的地方使用 axios 发送请求
-axios.get('users/')
-  .then(response => {
-    console.log(response.data);
-  })
-  .catch(error => {
-    console.error(error);
-  });
-
+// 创建 Vue 应用
 const app = createApp(App);
+
+// 注册 Vue Router
 app.use(router);
+
+// 挂载应用到 DOM
 app.mount('#app');
+

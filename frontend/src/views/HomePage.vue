@@ -1,7 +1,6 @@
 <template>
     <div>
-      <h1>欢迎来到交友平台</h1>
-      <p>这是平台的首页，欢迎您的访问。</p>
+      <h1>Welcome to HomePage</h1>
     </div>
   </template>
   
@@ -12,6 +11,6 @@
   </script>
   
   <style scoped>
-  /* 这里可以添加样式 */
+  /* 样式代码 */
   </style>
   
