@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,35 +32,38 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    # Django 默认应用
+    'django.contrib.admin',         # Django 管理后台
+    'django.contrib.auth',           # Django 用户认证系统
+    'django.contrib.contenttypes',  # Django 内容类型框架（用于跟踪模型之间的关系）
+    'django.contrib.sessions',      # Django 会话框架
+    'django.contrib.messages',      # Django 消息框架
+    'django.contrib.staticfiles',   # Django 静态文件管理框架
 
-    'rest_framework',
-    'rest_framework.authtoken', 
-    'corsheaders',
+    # 第三方应用
+    'rest_framework',               # Django REST Framework（用于构建 API）
+    'rest_framework.authtoken',     # REST Framework Token 认证模块（用于用户认证和令牌管理）
+    'corsheaders',                  # 跨域资源共享（CORS）处理（用于允许跨域请求）
 
-    'user',
+    # 自定义应用
+    'user',                         # 用户相关模块
 ]
+
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    # 跨域资源共享 (CORS) 处理，允许跨域请求
+    'corsheaders.middleware.CorsMiddleware',  # 必须放在其他中间件之前，确保跨域请求的正确处理
 
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Django 默认中间件
+    'django.middleware.security.SecurityMiddleware',  # 安全相关的中间件（如启用 HTTPS）
+    'django.contrib.sessions.middleware.SessionMiddleware',  # 会话管理，允许使用会话框架
+    'django.middleware.common.CommonMiddleware',  # 一些常见的中间件功能，如 URL 重定向、头部处理等
+    'django.middleware.csrf.CsrfViewMiddleware',  # CSRF 防护，防止跨站请求伪造攻击
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # 认证中间件，处理用户登录状态
+    'django.contrib.messages.middleware.MessageMiddleware',  # 消息框架中间件，处理用户消息的存储和传递
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  # 防止点击劫持攻击，限制页面的框架嵌入
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080',  # Vue 前端地址
-]
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -119,9 +123,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -138,12 +142,27 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'user.CustomUser'
+# 自定义用户模型，指定用户模型为 `user` 应用中的 `CustomUser`
+AUTH_USER_MODEL = 'user.CustomUser'  # 这里将 Django 默认的用户模型替换为自定义的 `CustomUser` 模型
 
+# Django REST Framework 配置
 REST_FRAMEWORK = {
+    # 默认的认证类：这里使用的是 Token 认证方式
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.TokenAuthentication',  # 通过 Token 进行认证，每个请求需要提供有效的 Token
     ],
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+# 跨域资源共享 (CORS) 配置
+CORS_ALLOW_ALL_ORIGINS = True  # 允许所有源（跨域）访问 API，这在开发阶段很方便，但生产环境应根据需要限制源
+
+# 明确允许的跨域源
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8080',  # 允许来自本地开发环境的 Vue 前端的请求
+]
+
+# 指定媒体文件存储的根目录
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 上传的文件将存储在项目根目录下的 `media` 文件夹中
+
+# 指定媒体文件的 URL 路径前缀
+MEDIA_URL = '/media/'  # 访问媒体文件时，URL 将以 `/media/` 开头
