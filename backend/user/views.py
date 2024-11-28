@@ -12,13 +12,12 @@ def register(request):
     """
     注册一个新用户
     """
-    # 获取请求数据并验证
     serializer = CustomUserSerializer(data=request.data)
     if serializer.is_valid():
         # 创建用户并保存
-        serializer.save()
-        return Response({"message": "注册成功"}, status=status.HTTP_201_CREATED)
-    # 如果数据无效，返回错误信息
+        user = serializer.save()
+        # 返回成功消息和用户基本信息
+        return Response({"message": "注册成功", "username": user.username}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 登录视图
@@ -37,7 +36,7 @@ def login(request):
     if user and user.check_password(password):
         # 登录成功，生成并返回 Token
         token, created = Token.objects.get_or_create(user=user)
-        return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response({"token": token.key, "username": user.username, "email": user.email}, status=status.HTTP_200_OK)
 
     return Response({"error": "用户名或密码错误"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -51,9 +50,8 @@ def logout(request):
     try:
         # 删除当前用户的认证 Token
         request.user.auth_token.delete()
-        return Response({"message": "注销成功"}, status=status.HTTP_200_OK)
+        return Response({"message": "已注销"}, status=status.HTTP_200_OK)
     except AttributeError:
-        # 如果未认证用户尝试注销，返回错误
         return Response({"error": "用户未认证"}, status=status.HTTP_401_UNAUTHORIZED)
 
 # 更新用户信息视图

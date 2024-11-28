@@ -1,34 +1,100 @@
-import { createStore } from 'vuex';  // 从 vuex 导入 createStore 方法
+import { createStore } from 'vuex';
+import axios from 'axios';  // 引入 axios 进行 API 请求
 
-// 创建并导出 Vuex 存储实例
 export default createStore({
-  // 定义应用的状态
+  // 定义状态
   state: {
-    user: null,  // 默认没有用户信息，后续可以设置为登录的用户数据
+    user: null,  // 用户信息，默认是 null
+    isLoggedIn: false,  // 登录状态
   },
 
-  // 定义 mutations，用于同步修改状态
+  // 定义 mutations，用于同步更新状态
   mutations: {
-    // 修改 user 状态的 mutation 方法
+    // 设置用户信息
     setUser(state, user) {
-      state.user = user;  // 将 user 对象设置为状态中的 user
+      state.user = user;
+      state.isLoggedIn = !!user;  // 如果有用户信息，则标记为已登录
+    },
+
+    // 清除用户信息
+    clearUser(state) {
+      state.user = null;
+      state.isLoggedIn = false;
     },
   },
 
   // 定义 actions，用于处理异步操作
   actions: {
-    // 异步获取用户数据
-    fetchUser({ commit }) {
-      axios.get('/users/')  // 发送 GET 请求到后端获取用户数据
+    // 登录操作
+    login({ commit }, credentials) {
+      axios.post('/api/user/login/', credentials)  // 向后端发送登录请求
         .then(response => {
-          commit('setUser', response.data);  // 请求成功后，提交 mutation 修改用户信息
+          const token = response.data.token;
+          localStorage.setItem('auth_token', token);  // 存储 Token
+          axios.defaults.headers['Authorization'] = `Token ${token}`;  // 设置 axios 默认的 Authorization header
+          commit('setUser', response.data.user);  // 更新 Vuex 中的用户信息
+        })
+        .catch(error => {
+          console.error('登录失败:', error);
+        });
+    },
+
+    // 获取当前登录的用户数据
+    fetchUser({ commit }) {
+      const token = localStorage.getItem('auth_token');  // 从 localStorage 获取 Token
+      if (token) {
+        axios.get('/api/user/profile/', {  // 获取用户资料的接口
+          headers: { Authorization: `Token ${token}` },
+        })
+          .then(response => {
+            commit('setUser', response.data);  // 更新用户数据
+          })
+          .catch(error => {
+            console.error('获取用户数据失败:', error);
+            commit('clearUser');  // 如果获取失败，清除用户信息
+          });
+      }
+    },
+
+    // 注销操作
+    logout({ commit }) {
+      localStorage.removeItem('auth_token');  // 清除 Token
+      delete axios.defaults.headers['Authorization'];  // 清除 axios 的 Authorization header
+      commit('clearUser');  // 清除用户信息
+    },
+
+    // 更新用户信息
+    updateUser({ commit }, userInfo) {
+      axios.put('/api/user/update/', userInfo)  // 更新用户信息的接口
+        .then(response => {
+          commit('setUser', response.data);  // 更新 Vuex 中的用户信息
+        })
+        .catch(error => {
+          console.error('更新用户信息失败:', error);
         });
     },
   },
 
-  // 定义 getters，用于获取状态中的数据
+  // 定义 getters，用于访问状态数据
   getters: {
-    // 获取当前的用户信息
-    getUser: (state) => state.user,  // 返回状态中的 user 值
+    isLoggedIn(state) {
+      return state.isLoggedIn;
+    },
+    getUser(state) {
+      return state.user;
+    },
   },
+
+  // 持久化 Vuex 状态 (比如保持用户信息和登录状态)
+  plugins: [
+    store => {
+      store.subscribe((mutation, state) => {
+        if (state.user) {
+          localStorage.setItem('user', JSON.stringify(state.user));  // 保存用户信息到 localStorage
+        } else {
+          localStorage.removeItem('user');  // 如果用户退出，移除用户信息
+        }
+      });
+    },
+  ],
 });

@@ -1,22 +1,35 @@
-import { createRouter, createWebHistory } from 'vue-router';  // 从 vue-router 导入路由相关的函数
-import HomePage from '../views/HomePage.vue';  // 导入首页视图组件
-import LoginPage from '../views/LoginPage.vue';  // 导入登录页视图组件
-import RegisterPage from '../views/RegisterPage.vue';  // 导入注册页视图组件
-import ProfilePage from '../views/ProfilePage.vue';  // 导入个人信息页视图组件
+import { createRouter, createWebHistory } from 'vue-router';
+import HomePage from '../views/HomePage.vue';
+import LoginPage from '../views/LoginPage.vue';
+import RegisterPage from '../views/RegisterPage.vue';
+import ProfilePage from '../views/ProfilePage.vue';
 
 // 定义路由配置
 const routes = [
-  { path: '/', name: 'home', component: HomePage },  // 首页路由，访问 '/' 时显示 HomePage 组件
-  { path: '/login', name: 'login', component: LoginPage },  // 登录页路由，访问 '/login' 时显示 LoginPage 组件
-  { path: '/register', name: 'register', component: RegisterPage },  // 注册页路由，访问 '/register' 时显示 RegisterPage 组件
-  { path: '/profile', name: 'profile', component: ProfilePage },  // 个人信息页路由，访问 '/profile' 时显示 ProfilePage 组件
+  { path: '/', name: 'home', component: HomePage },
+  { path: '/login', name: 'login', component: LoginPage },
+  { path: '/register', name: 'register', component: RegisterPage },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: ProfilePage,
+    meta: { requiresAuth: true },  // 需要登录才能访问
+  },
 ];
 
 // 创建 Vue Router 实例
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),  // 使用 HTML5 History 模式，支持前端路由管理
-  routes,  // 注册路由规则
+  history: createWebHistory(process.env.BASE_URL),
+  routes,
 });
 
-// 导出路由实例
+// 导航守卫，检查是否需要登录
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth && !localStorage.getItem('auth_token')) {
+    next({ name: 'login' });  // 如果没有 Token，则跳转到登录页
+  } else {
+    next();  // 继续正常的路由跳转
+  }
+});
+
 export default router;

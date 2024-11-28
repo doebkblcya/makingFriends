@@ -12,7 +12,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'password', 
             'birthday', 'phone_number', 'profile_picture', 
-            'region', 'rank'
+            'region', 'tier'  # 修正为 'tier' 而非 'rank'
         ]  # 增加了生日、电话、头像、大区和段位字段
 
         extra_kwargs = {
@@ -32,7 +32,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
             phone_number=validated_data.get('phone_number'),
             profile_picture=validated_data.get('profile_picture'),
             region=validated_data.get('region'),
-            rank=validated_data.get('rank')
+            tier=validated_data.get('tier')  # 使用 'tier' 而非 'rank'
         )
         return user
 
@@ -47,14 +47,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
         
         # 如果提供了新密码，则更新密码，且进行哈希处理
         if 'password' in validated_data:
-            instance.set_password(validated_data['password'])
+            instance.set_password(validated_data['password'])  # 确保密码被加密
         
         # 更新生日、电话号码、头像、大区和段位等
         instance.birthday = validated_data.get('birthday', instance.birthday)
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)
         instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
         instance.region = validated_data.get('region', instance.region)
-        instance.rank = validated_data.get('rank', instance.rank)
+        instance.tier = validated_data.get('tier', instance.tier)  # 使用 'tier' 而非 'rank'
         
         # 保存更新后的用户实例
         instance.save()
