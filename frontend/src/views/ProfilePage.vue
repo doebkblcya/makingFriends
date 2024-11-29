@@ -76,7 +76,7 @@ export default {
     // 更新个人信息
     const updateProfile = async () => {
       try {
-        await apiClient.post('update_user_info/', form.value);
+        await apiClient.post('user/update/', form.value);
         router.push({ name: 'home' });  // 修改成功后跳转回主页
       } catch (error) {
         console.error('更新失败:', error);

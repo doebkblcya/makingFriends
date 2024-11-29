@@ -18,7 +18,13 @@ export default {
     // 注销功能
     const logout = async () => {
       try {
-        await apiClient.post('logout/');
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          // 将 Token 添加到请求头
+          await apiClient.post('user/logout/', {}, {
+            headers: { Authorization: `Token ${token}` },
+          });
+        }
         localStorage.removeItem('auth_token');  // 清除本地存储的 token
         router.push({ name: 'login' });  // 注销成功后跳转到登录页面
       } catch (error) {
@@ -40,5 +46,9 @@ export default {
 .home-page {
   text-align: center;
   margin-top: 20px;
+}
+
+.el-button {
+  margin: 10px;
 }
 </style>

@@ -1,4 +1,5 @@
 import axios from 'axios';  // 引入 axios 库，用于发送 HTTP 请求
+import { Message } from 'element-plus';  // 引入 Element Plus 的消息组件（如果使用）
 
 // 创建 axios 实例
 const apiClient = axios.create({
@@ -28,11 +29,15 @@ apiClient.interceptors.request.use(config => {
 apiClient.interceptors.response.use(
   response => response,  // 响应成功时直接返回响应数据
   error => {
-    if (error.response && error.response.status === 401) {
-      // 如果是未授权错误（401），可以跳转到登录页或清除用户信息
-      localStorage.removeItem('auth_token');
-      // 跳转到登录页面，假设你使用了 Vue Router
-      window.location.href = '/login';  // 或者使用 this.$router.push('/login');
+    if (error.response) {
+      if (error.response.status === 401) {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/login';  // 跳转到登录页
+      } else {
+        Message.error('请求失败，请稍后重试');  // 通过 Element UI 显示错误消息
+      }
+    } else {
+      Message.error('网络异常，请检查您的网络连接');  // 网络错误
     }
     console.error('API 错误：', error);  // 控制台输出错误信息
     return Promise.reject(error);  // 返回错误

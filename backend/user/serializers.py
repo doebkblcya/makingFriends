@@ -46,9 +46,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
         instance.email = validated_data.get('email', instance.email)
         
         # 如果提供了新密码，则更新密码，且进行哈希处理
-        if 'password' in validated_data:
+        if 'password' in validated_data and validated_data['password']:
             instance.set_password(validated_data['password'])  # 确保密码被加密
-        
+
         # 更新生日、电话号码、头像、大区和段位等
         instance.birthday = validated_data.get('birthday', instance.birthday)
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)

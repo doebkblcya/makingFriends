@@ -4,8 +4,8 @@ import axios from 'axios';  // 引入 axios 进行 API 请求
 export default createStore({
   // 定义状态
   state: {
-    user: null,  // 用户信息，默认是 null
-    isLoggedIn: false,  // 登录状态
+    user: JSON.parse(localStorage.getItem('user')) || null,  // 如果 localStorage 中有用户信息，则初始化
+    isLoggedIn: !!localStorage.getItem('auth_token'),  // 判断登录状态
   },
 
   // 定义 mutations，用于同步更新状态
@@ -32,7 +32,17 @@ export default createStore({
           const token = response.data.token;
           localStorage.setItem('auth_token', token);  // 存储 Token
           axios.defaults.headers['Authorization'] = `Token ${token}`;  // 设置 axios 默认的 Authorization header
-          commit('setUser', response.data.user);  // 更新 Vuex 中的用户信息
+
+          // 登录后获取用户信息
+          axios.get('/api/user/profile/', {  // 获取用户资料的接口
+            headers: { Authorization: `Token ${token}` },
+          })
+          .then(userResponse => {
+            commit('setUser', userResponse.data);  // 更新 Vuex 中的用户信息
+          })
+          .catch(error => {
+            console.error('获取用户数据失败:', error);
+          });
         })
         .catch(error => {
           console.error('登录失败:', error);

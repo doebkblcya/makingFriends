@@ -85,7 +85,7 @@ export default {
 
     const register = async () => {
       try {
-        await apiClient.post('register/', form.value);
+        await apiClient.post('user/register/', form.value);
         router.push({ name: 'login' });  // 注册成功后跳转到登录页面
       } catch (error) {
         console.error('注册失败:', error);
